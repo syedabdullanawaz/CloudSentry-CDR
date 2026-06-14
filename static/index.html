@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudSentry CDR — Security Operations Center</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet.js CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css?v=29">
+</head>
+<body>
+    <!-- Cloud Nebulae Background (Hidden via CSS, kept for legacy compatibility) -->
+    <div class="cloud-bg">
+        <div class="cloud-blur cloud-1"></div>
+        <div class="cloud-blur cloud-2"></div>
+        <div class="cloud-blur cloud-3"></div>
+    </div>
+    
+    <div class="app-container">
+        <!-- ---------------------------------------------------- -->
+        <!-- 1. PREMIUM TOP SAAS HEADER -->
+        <!-- ---------------------------------------------------- -->
+        <header class="top-nav-header">
+            <div class="header-content-inner">
+                <div class="header-top-row">
+                    <div class="brand-section">
+                        <div class="logo-glow">
+                            <img src="/static/logo.png" alt="CloudSentry Logo" class="brand-logo-img">
+                        </div>
+                        <div class="brand-text">
+                            <h2>CloudSentry</h2>
+                            <span class="sub-label">CDR Console</span>
+                        </div>
+                    </div>
+                    
+                    <div class="top-nav-controls">
+                        <div class="breadcrumb-container">
+                            <span class="crumb">Systems</span>
+                            <i class="fa-solid fa-chevron-right crumb-sep"></i>
+                            <span class="crumb">CloudSentry SOC</span>
+                            <i class="fa-solid fa-chevron-right crumb-sep"></i>
+                            <span class="crumb active">Active Telemetry</span>
+                        </div>
+                        <div class="system-status-indicator">
+                            <span class="status-dot pulsing"></span>
+                            <span class="status-text">Scanner Core: Active</span>
+                        </div>
+                        <div class="user-badge">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>SOC-Analyst-01</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-bottom-row">
+                    <div class="top-tabs-nav">
+                        <a href="#" class="top-tab-item active" data-tab="dashboard">
+                            <i class="fa-solid fa-gauge-high"></i> Operations Monitor
+                        </a>
+                        <a href="#" class="top-tab-item" data-tab="map">
+                            <i class="fa-solid fa-globe"></i> Threat Geo-Radar
+                        </a>
+                        <a href="#" class="top-tab-item" data-tab="incidents">
+                            <i class="fa-solid fa-shield-alert"></i> Incident Center
+                            <span class="top-badge" id="top-incident-count">0</span>
+                        </a>
+                        <a href="#" class="top-tab-item" data-tab="playbooks">
+                            <i class="fa-solid fa-bolt-lightning"></i> Containment Hub
+                        </a>
+                        <a href="#" class="top-tab-item" data-tab="settings">
+                            <i class="fa-solid fa-sliders"></i> Integrations
+                        </a>
+                    </div>
+                    
+                    <div class="header-global-actions">
+                        <button class="btn btn-primary" id="btn-scan">
+                            <i class="fa-solid fa-fingerprint"></i> Trigger Audits
+                        </button>
+                        <button class="btn btn-secondary" id="btn-seed">
+                            <i class="fa-solid fa-vial-virus"></i> Inject Mock Ingest
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- 2. MAIN HUB VIEWPORT -->
+        <!-- ---------------------------------------------------- -->
+        <main class="main-content">
+            <!-- Header Operations Bar -->
+            <header class="main-header">
+                
+                <div class="header-titles">
+                    <h1>Security Operations Center Dashboard</h1>
+                </div>
+                
+                <!-- 4-Column Operations Metrics Grid -->
+                <div class="metrics-grid">
+                    <!-- Metric Card 1: Critical -->
+                    <div class="metric-card glow-critical">
+                        <div class="metric-header">
+                            <span class="metric-title">Critical Breaches</span>
+                            <i class="fa-solid fa-skull-crossbones icon-red"></i>
+                        </div>
+                        <div class="metric-body">
+                            <h3 class="metric-value" id="metric-critical">0</h3>
+                            <div class="metric-chart-wrapper">
+                                <canvas class="sparkline-chart" id="spark-critical" width="100" height="30"></canvas>
+                            </div>
+                        </div>
+                        <div class="metric-footer">
+                            <span class="trend red"><i class="fa-solid fa-triangle-exclamation"></i> Action required</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Metric Card 2: Open alerts -->
+                    <div class="metric-card glow-warning">
+                        <div class="metric-header">
+                            <span class="metric-title">Compliance Defects</span>
+                            <i class="fa-solid fa-triangle-exclamation icon-orange"></i>
+                        </div>
+                        <div class="metric-body">
+                            <h3 class="metric-value" id="metric-open">0</h3>
+                            <div class="metric-chart-wrapper">
+                                <canvas class="sparkline-chart" id="spark-open" width="100" height="30"></canvas>
+                            </div>
+                        </div>
+                        <div class="metric-footer">
+                            <span class="trend yellow"><i class="fa-solid fa-circle-info"></i> Pending CIS mitigation</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Metric Card 3: Budget Leak -->
+                    <div class="metric-card glow-finops">
+                        <div class="metric-header">
+                            <span class="metric-title">FinOps Cost Leakage</span>
+                            <i class="fa-solid fa-sack-dollar icon-green"></i>
+                        </div>
+                        <div class="metric-body">
+                            <h3 class="metric-value" id="metric-leak">$0.00</h3>
+                            <div class="metric-chart-wrapper">
+                                <canvas class="sparkline-chart" id="spark-leak" width="100" height="30"></canvas>
+                            </div>
+                        </div>
+                        <div class="metric-footer">
+                            <span class="trend green"><i class="fa-solid fa-arrow-down-long"></i> Detached EC2 assets</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Metric Card 4: Event volume -->
+                    <div class="metric-card glow-ingest">
+                        <div class="metric-header">
+                            <span class="metric-title">SIEM Event Rate</span>
+                            <i class="fa-solid fa-wave-square icon-cyan"></i>
+                        </div>
+                        <div class="metric-body">
+                            <h3 class="metric-value" id="metric-ingest">124 <span class="unit">eps</span></h3>
+                            <div class="metric-chart-wrapper">
+                                <canvas class="sparkline-chart" id="spark-ingest" width="100" height="30"></canvas>
+                            </div>
+                        </div>
+                        <div class="metric-footer">
+                            <span class="trend cyan"><i class="fa-solid fa-circle-check"></i> CloudTrail pipeline OK</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-viewport">
+                <!-- ---------------------------------------------------- -->
+                <!-- TAB 1: OPERATIONS MONITOR -->
+                <!-- ---------------------------------------------------- -->
+                <section class="tab-section active" id="tab-dashboard">
+                    <div class="grid-col-2">
+                        <!-- Left Column: Threat Ingress Profiling & Tickers -->
+                        <div class="col-layout-flex">
+                            <div class="panel">
+                                <h3><i class="fa-solid fa-chart-pie font-color-blue"></i> Incident Severity Profiling</h3>
+                                <div class="doughnut-chart-layout">
+                                    <div class="doughnut-chart-wrapper">
+                                        <canvas id="chart-severity"></canvas>
+                                    </div>
+                                    <div class="doughnut-legend-container" id="chart-severity-legend">
+                                        <!-- Dynamically populated custom HTML legends -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="panel">
+                                <h3><i class="fa-solid fa-terminal font-color-blue blink"></i> Live SIEM Ingestion & Activity Monitor</h3>
+                                <div class="live-feed-container" id="live-activity-feed">
+                                    <!-- Injected dynamically via app.js -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column: Cost and Compliance Checklist -->
+                        <div class="col-layout-flex">
+                            <div class="panel">
+                                <h3><i class="fa-solid fa-chart-column font-color-green"></i> Cost Exposure Breakdown (FinOps)</h3>
+                                <div class="cost-chart-layout">
+                                    <div class="chart-container" id="chart-cost-container">
+                                        <canvas id="chart-cost"></canvas>
+                                    </div>
+                                    <div class="chart-empty-state" id="chart-cost-empty" style="display: none;">
+                                        <i class="fa-solid fa-cloud-sun empty-icon"></i>
+                                        <h4>All Systems Optimized</h4>
+                                        <p>No active infrastructure cost leaks or orphaned Elastic IPs detected in your accounts.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="panel">
+                                <h3><i class="fa-solid fa-circle-check font-color-purple"></i> CIS AWS Benchmarks Compliance Health</h3>
+                                <div class="compliance-checklist-layout">
+                                    <!-- Circular score gauge -->
+                                    <div class="health-box gauge-box">
+                                        <div class="gauge-wrapper">
+                                            <svg class="compliance-gauge" viewBox="0 0 100 100">
+                                                <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
+                                                <circle class="gauge-fill" id="compliance-gauge-fill" cx="50" cy="50" r="40" style="stroke-dasharray: 251.2; stroke-dashoffset: 0;"></circle>
+                                            </svg>
+                                            <div class="gauge-value-wrapper">
+                                                <span class="box-label">Compliance</span>
+                                                <h2 id="compliance-index">100%</h2>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Interactive Checklist checks -->
+                                    <div class="checklist-grid">
+                                        <div class="checklist-item" id="check-mfa">
+                                            <div class="check-header">
+                                                <span class="check-title">AWS Console MFA Checks</span>
+                                                <span class="badge" id="badge-mfa">PASS</span>
+                                            </div>
+                                            <p class="check-desc">Ensures MFA is enabled for console root & administrative profiles.</p>
+                                        </div>
+                                        <div class="checklist-item" id="check-leak">
+                                            <div class="check-header">
+                                                <span class="check-title">Public Key Leak Monitor</span>
+                                                <span class="badge" id="badge-leak">PASS</span>
+                                            </div>
+                                            <p class="check-desc">Checks for exposed credentials on GitHub repositories.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------------------- -->
+                <!-- TAB 2: THREAT GEO-RADAR -->
+                <!-- ---------------------------------------------------- -->
+                <section class="tab-section" id="tab-map">
+                    <div class="panel no-padding relative-container">
+                        <div class="map-overlay-info">
+                            <h4><i class="fa-solid fa-bullseye blink"></i> Intrusion Radar Sweep</h4>
+                            <p>Tracks geographical origin coords of CloudTrail privilege abuse or console brute-forcing.</p>
+                        </div>
+                        
+                        <!-- Radar scan scanner line -->
+                        <div class="radar-scanner-overlay"></div>
+                        
+                        <div id="threat-map" class="threat-map-element"></div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------------------- -->
+                <!-- TAB 3: INCIDENT CENTER -->
+                <!-- ---------------------------------------------------- -->
+                <section class="tab-section" id="tab-incidents">
+                    <div class="panel">
+                        <div class="stream-header-filters">
+                            <h3><i class="fa-solid fa-shield-virus font-color-blue"></i> Correlated Incident Feed</h3>
+                            <div class="filters-row">
+                                <div class="search-input-wrapper">
+                                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                    <input type="text" id="stream-search" placeholder="Filter resource ID, target user, IP...">
+                                </div>
+                                <select id="filter-severity" class="custom-select">
+                                    <option value="ALL">All Severities</option>
+                                    <option value="CRITICAL">Critical Only</option>
+                                    <option value="HIGH">High Severity</option>
+                                    <option value="MEDIUM">Medium Severity</option>
+                                    <option value="LOW">Low Severity</option>
+                                </select>
+                                <select id="filter-status" class="custom-select">
+                                    <option value="ALL">All States</option>
+                                    <option value="OPEN">Open Incidents</option>
+                                    <option value="RESOLVED">Resolved Checks</option>
+                                    <option value="SUPPRESSED">Suppressed</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- High density cards feed listing -->
+                        <div class="incident-feed-list" id="incidents-feed-container">
+                            <!-- Injected dynamically via app.js -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------------------- -->
+                <!-- TAB 4: CONTAINMENT & REMEDIATION PLAYBOOKS -->
+                <!-- ---------------------------------------------------- -->
+                <section class="tab-section" id="tab-playbooks">
+                    <div class="panel">
+                        <div class="playbook-top-bar">
+                            <h3><i class="fa-solid fa-circle-nodes font-color-red"></i> Incident Remediation Engine</h3>
+                            <span class="soc-tag">Containment core: ONLINE</span>
+                        </div>
+                        <p class="description-para">Deploy automated, surgical containment playbooks to isolate credentials, quarantine resources, or release idle leakages.</p>
+                        
+                        <div class="playbook-hub-layout">
+                            <div class="incident-selector-pane">
+                                <h4>Select Active Vulnerability Context</h4>
+                                <select id="playbook-incident-select" class="custom-select">
+                                    <option value="">-- Choose active security incident --</option>
+                                </select>
+                            </div>
+                            
+                            <div class="playbook-runner-pane disabled" id="remediation-runner-pane">
+                                <div class="remediation-card" id="playbook-card">
+                                    <h4 id="playbook-title">Playbook Configuration</h4>
+                                    
+                                    <div class="info-alert-box">
+                                        <p id="playbook-desc">Select an incident from the left pane to fetch containment protocols.</p>
+                                        <span class="compliance-tag" id="playbook-compliance">CIS Mapping: None</span>
+                                    </div>
+                                    
+                                    <div class="remediation-actions-wrapper">
+                                        <div class="remediation-toggle-group">
+                                            <label class="switch-container">
+                                                <input type="checkbox" id="playbook-dry-run" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                            <div class="toggle-text">
+                                                <strong>Safety Switch: Enable Dry Run Mode</strong>
+                                                <span class="toggle-sub">Simulates playbooks in SQLite logs without calling active AWS endpoints.</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="playbook-action-buttons" id="playbook-actions-group">
+                                            <!-- Dynamically generated action buttons -->
+                                        </div>
+                                        
+                                        <!-- Playbook Execution Terminal Console -->
+                                        <div class="terminal-console-wrapper" id="playbook-terminal-wrapper" style="display: none;">
+                                            <h5>Execution Telemetry Terminal</h5>
+                                            <div class="terminal-console" id="playbook-terminal">
+                                                <div class="terminal-line">[SYSTEM] Active containment console initialized. Select a playbook action.</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="remediation-actions-alt">
+                                            <h5>Suppress / Avoid Alert</h5>
+                                            <div class="suppress-row">
+                                                <input type="text" id="suppress-reason" class="custom-input" placeholder="Input compliance justification...">
+                                                <button class="btn btn-secondary" id="btn-suppress">Suppress Alert</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------------------- -->
+                <!-- TAB 5: CONFIGURATION SETTINGS -->
+                <!-- ---------------------------------------------------- -->
+                <section class="tab-section" id="tab-settings">
+                    <div class="panel">
+                        <h3><i class="fa-solid fa-sliders font-color-blue"></i> Alerting & Policy Integrations</h3>
+                        <p class="description-para">Configure geofencing properties, webhook targets, and autonomous security levels.</p>
+                        
+                        <div class="settings-form spacer-top">
+                            <div class="form-group">
+                                <label for="setting-webhook">Discord SIEM Channel Webhook</label>
+                                <input type="password" id="setting-webhook" class="custom-input" placeholder="https://discord.com/api/webhooks/...">
+                                <span class="help-text">Directly posts critical severity alerts and active mitigations to your Discord channel.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="setting-policy">Default Active Containment Policy</label>
+                                <select id="setting-policy" class="custom-select">
+                                    <option value="MANUAL">MANUAL (Analyst confirmation required)</option>
+                                    <option value="AUTONOMOUS">AUTONOMOUS (Zero-Trust automated deactivation)</option>
+                                </select>
+                                <span class="help-text">Warning: Autonomous containment will revoke compromised access keys and release orphaned Elastic IPs instantly.</span>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="btn-save-settings">Save Policy Config</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet.js script library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Application Javascript -->
+    <script src="/static/app.js?v=29"></script>
+</body>
+</html>

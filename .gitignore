@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database (CRITICAL: Prevents your Discord webhook and local incidents from leaking)
+*.db
+*.db-journal
+*.sqlite3
+
+# Local credentials & secrets
+.env
+.secrets
+credentials.json
+*.pem
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db

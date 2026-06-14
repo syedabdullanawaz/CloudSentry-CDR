@@ -1,0 +1,8 @@
+boto3
+streamlit
+pandas
+plotly
+requests
+pycountry
+fastapi
+uvicorn
